@@ -4,7 +4,7 @@ MongoClient.connect('mongodb://localhost:27017', {useNewUrlParser: true}, (err, 
     if (err) {
         return console.log('Unable to connect to the MongoDB server');
     }
-    console.log('Conntected to the MongoDB server');
+    console.log('Connected to the MongoDB server');
 
     const db = client.db('ToDoApp');
 
