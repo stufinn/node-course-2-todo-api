@@ -6,12 +6,26 @@ const {ToDo} = require('./../models/todo');
 
 //"testing lifecycle method", i.e. Hooks: https://mochajs.org/#hooks
 //lets us run code before every single test case
-// this makes sure database is empty
+// this makes sure database is empty or populated with sample data
 //Is this a root level hook?: https://mochajs.org/#root-level-hooks
 //YES - will run before every test case
+const sampleTodo = [{
+    text:"First sample todo"
+  },
+  {
+    text:"Second sample todo"
+  },
+  {
+    text:"Third sample todo"
+}];
+
 beforeEach( 'clear todos data for test', (done) => {
-    ToDo.remove({}).then( () => done() );
+    ToDo.remove({}).then( () => {
+      return ToDo.insertMany(sampleTodo);
+    }).then(()=>done());
 });
+
+// End of lifecycle method
 
 describe('POST /todos', () => {
     it('should create a new todo', (done) => {
@@ -31,7 +45,7 @@ describe('POST /todos', () => {
             }
             //fetch all the todos from the database and check that the number we expect are actually there
             //ToDo.find fetches every single todo inside of the _collection_
-            ToDo.find().then( (todos) => {
+            ToDo.find({text}).then( (todos) => {
                 expect(todos.length).toBe(1);
                 expect(todos[0].text).toBe(text);
                 done();
@@ -50,12 +64,22 @@ describe('POST /todos', () => {
             return done(err);
             }
           ToDo.find().then( (todos) => {
-            expect(todos.length).toBe(0); //make some assumptions about the database (should be 0) //** the lifecycle method will erase the database before each test */
+            expect(todos.length).toBe(3); //make some assumptions about the database (should be 0) //** the lifecycle method will erase the database before each test */
             done();
           }).catch( (e) => done(e) );
         });
-        
-        
-        done();
     });
+});
+
+describe('GET /todos route', () => {
+  it('should get all todos', (done) => {
+    request(app)
+    .get('/todos')
+    .expect(200)
+    .expect( (res) => {
+      expect(res.body.todos.length).toBe(3);
+    })
+    .end(done);
+
+  });
 });
