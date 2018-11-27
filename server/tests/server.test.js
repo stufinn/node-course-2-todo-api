@@ -22,7 +22,7 @@ const sampleTodo = [{
 beforeEach( 'clear todos data for test', (done) => {
     ToDo.remove({}).then( () => {
       return ToDo.insertMany(sampleTodo);
-    }).then(()=>done());
+    }).then( () => done() );
 });
 
 // End of lifecycle method
@@ -39,17 +39,21 @@ describe('POST /todos', () => {
           .expect( (res) => {
             expect(res.body.text).toBe(text)
           })
+          //we want to check what got stored in the mongoDB collection
+          //callback fxn allows us to do a few things
           .end( (error, res) => {  // https://www.npmjs.com/package/supertest
             if (error) {
                 return done(error);
             }
             //fetch all the todos from the database and check that the number we expect are actually there
             //ToDo.find fetches every single todo inside of the _collection_
-            ToDo.find({text}).then( (todos) => {
-                expect(todos.length).toBe(1);
-                expect(todos[0].text).toBe(text);
-                done();
-            }).catch( (e) => done(e));
+            ToDo.find({text}) //fetch ALL todos from the DB
+                .then( (todos) => {
+                  expect(todos.length).toBe(1);
+                  expect(todos[0].text).toBe(text);
+                  done(); //wraps up the test case
+                })
+                .catch( (e) => done(e));//this will catch any erros that occur inside of our callback
           });
     });
 
