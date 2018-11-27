@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 //desructuring vvv
+const {ObjectID} = require('mongodb'); //import ObjectID module from mongoDB library
 var {mongoose} = require('./db/mongoose');
 var {ToDo} = require('./models/todo');
 var {User} = require('./models/user');
@@ -39,6 +40,33 @@ app.get('/todos', (req,res) => {
         res.status(400).send(e);
     });
 
+});
+
+// GET /todos/1234324
+// :id creates an id variable, created on the _request_ object
+app.get('/todos/:id', (req, res) => {
+    var id = req.params.id;
+    // res.send(id);
+    // If ID is invalid, returns a 404 status an empty response body
+    if (!ObjectID.isValid(id)) {
+        console.log('Invalid ID');
+        return res.status(404).send();
+    }
+    // res.send(id);
+
+    ToDo.findById(id).then( (todo) => {
+        if (!todo) { //i.e. if no todo was returned...
+            console.log('The ToDo was not found');
+            return res.status(404).send();
+        }
+        //if a todo is returned, send back the todo as the body of the response
+        console.log('User by ID:', JSON.stringify(todo, undefined, 2));
+        res.send(todo);
+    }).catch( (e) => {
+        //don't send the error object here in .send() because it could include private information
+        res.status(400).send();
+        console.log('Some kind of error occurred', e.message);
+    });
 });
 
 app.listen(3000, () => {
