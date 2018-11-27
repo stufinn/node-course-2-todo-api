@@ -61,7 +61,7 @@ app.get('/todos/:id', (req, res) => {
         }
         //if a todo is returned, send back the todo as the body of the response
         // console.log('User by ID:', JSON.stringify(todo, undefined, 2));
-        res.send(todo);
+        res.send({todo});
     }).catch( (e) => {
         //don't send the error object here in .send() because it could include private information
         res.status(400).send();

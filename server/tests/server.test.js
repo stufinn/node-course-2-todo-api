@@ -113,8 +113,8 @@ describe('GET /todos/:id', () => {
       .get(`/todos/${sampleTodo[0]._id.toHexString()}`) // get ID from first item in todos object and convert ID to a string with .toHexString() method
       .expect(200)
       .expect( (res) => {
-        // console.log(res.body.text);
-        expect(res.body.text).toBe(sampleTodo[0].text);
+        // console.log(res.body);
+        expect(res.body.todo.text).toBe(sampleTodo[0].text);
       })
       .end(done);
     });
