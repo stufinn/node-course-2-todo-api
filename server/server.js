@@ -49,18 +49,18 @@ app.get('/todos/:id', (req, res) => {
     // res.send(id);
     // If ID is invalid, returns a 404 status an empty response body
     if (!ObjectID.isValid(id)) {
-        console.log('Invalid ID');
+        // console.log('Invalid ID');
         return res.status(404).send();
     }
     // res.send(id);
 
     ToDo.findById(id).then( (todo) => {
         if (!todo) { //i.e. if no todo was returned...
-            console.log('The ToDo was not found');
+            // console.log('The ToDo was not found');
             return res.status(404).send();
         }
         //if a todo is returned, send back the todo as the body of the response
-        console.log('User by ID:', JSON.stringify(todo, undefined, 2));
+        // console.log('User by ID:', JSON.stringify(todo, undefined, 2));
         res.send(todo);
     }).catch( (e) => {
         //don't send the error object here in .send() because it could include private information
