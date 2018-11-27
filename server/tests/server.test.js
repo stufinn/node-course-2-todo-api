@@ -47,7 +47,7 @@ describe('POST /todos', () => {
             }
             //fetch all the todos from the database and check that the number we expect are actually there
             //ToDo.find fetches every single todo inside of the _collection_
-            ToDo.find({text}) //fetch ALL todos from the DB
+            ToDo.find({text}) //fetch only  todo with text from above
                 .then( (todos) => {
                   expect(todos.length).toBe(1);
                   expect(todos[0].text).toBe(text);
@@ -63,12 +63,12 @@ describe('POST /todos', () => {
         .post('/todos')
         .send({}) //pass in nothing at all
         .expect(400) //expect 400 error
-        .end( (err, res) => {
+        .end( (err, res) => {  //function in end() allows us to run a function _asychronously_
           if (err) {
             return done(err);
             }
           ToDo.find().then( (todos) => {
-            expect(todos.length).toBe(3); //make some assumptions about the database (should be 0) //** the lifecycle method will erase the database before each test */
+            expect(todos.length).toBe(3); //make some assumptions about the database (should be 0) //** the lifecycle method will erase and repopulate the database BEFORE EACH TEST */
             done();
           }).catch( (e) => done(e) );
         });
