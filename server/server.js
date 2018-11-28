@@ -70,6 +70,35 @@ app.get('/todos/:id', (req, res) => {
     });
 });
 
+//DELETE route
+
+app.delete('/todos/:id', (req, res) => {
+    //get the ID
+    //req.params is where all of our url parameters are stored
+    var id = req.params.id;
+    if (!ObjectID.isValid(id)) {
+        return res.status(404).send();
+    }
+
+    ToDo.findByIdAndRemove(id).then( (todo) => {
+        if (!todo) {
+            return res.status(404).send();
+        }
+        res.send({todo});
+    }).catch( (e) => {
+        res.status(400).send();
+        console.log('Some kind of error occured', e.message);
+    });
+
+    //validate the ID --> not valid? return a 404
+
+    //remove todo by ID
+        //success
+            //if no doc, send 404
+            //if doc, send doc back with a 200
+        //error - 400 with empty body
+});
+
 app.listen(port, () => {
     console.log(`Started up on port ${port}`);
 });
