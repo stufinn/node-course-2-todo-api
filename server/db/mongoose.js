@@ -5,7 +5,7 @@ const mongoose  = require('mongoose');
 //this line just needs to be in server.js
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost:27017/ToDoApp').then( () => {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ToDoApp').then( () => {
     console.log('Mongoose is connected to the mongoDB server');
 }, (e) => {
     console.log('Mongoose is unable to connect to server', e);

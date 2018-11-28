@@ -8,6 +8,7 @@ var {ToDo} = require('./models/todo');
 var {User} = require('./models/user');
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 //configure middleware
 //with this, can send json data to our application
@@ -69,8 +70,8 @@ app.get('/todos/:id', (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log('Express app is running on port 3000');
+app.listen(port, () => {
+    console.log(`Started up on port ${port}`);
 });
 
 module.exports = {app};
