@@ -1,13 +1,14 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 //desructuring vvv
 const {ObjectID} = require('mongodb'); //import ObjectID module from mongoDB library
-var {mongoose} = require('./db/mongoose');
-var {ToDo} = require('./models/todo');
-var {User} = require('./models/user');
+const {mongoose} = require('./db/mongoose');
+const {ToDo} = require('./models/todo');
+const {User} = require('./models/user');
 
-var app = express();
+const app = express();
 const port = process.env.PORT || 3000;
 
 //configure middleware
@@ -73,6 +74,7 @@ app.get('/todos/:id', (req, res) => {
 //DELETE route
 
 app.delete('/todos/:id', (req, res) => {
+    
     //get the ID
     //req.params is where all of our url parameters are stored
     var id = req.params.id;
@@ -97,6 +99,46 @@ app.delete('/todos/:id', (req, res) => {
             //if no doc, send 404
             //if doc, send doc back with a 200
         //error - 400 with empty body
+});
+
+
+//Update todo items
+//REVIEW THIS
+
+app.patch('/todos/:id', (req,res) => {
+    var id = req.params.id;
+    // _.pick() method specifies which of the properties we want associate with the body variable and therefore, the only ones that the user can manipulate (and can't add new ones)
+    //e.g. the can't edit "completedAt"
+    var body = _.pick(req.body, ['text', 'completed']);
+    
+    if (!ObjectID.isValid(id)) {
+        return res.status(404).send();
+    }
+    //check the completed value, and if needed set "completedAt"
+    // console.log(req);
+    console.log(req.body);
+
+
+    if (_.isBoolean(body.completed) && body.completed) { // i.e. is body.completed a boolean AND is it true
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null; //removes value from the DB
+    }
+
+    ToDo.findByIdAndUpdate(id, {
+        $set: body
+    }, {
+        new: true
+    }).then( (todo) => {
+        if (!todo) {
+            return res.status(404).send();
+        }
+        res.send({todo});
+    }).catch( (e) => {
+        res.status(400).send();
+    });
+
 });
 
 app.listen(port, () => {
