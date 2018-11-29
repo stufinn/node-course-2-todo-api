@@ -116,7 +116,7 @@ app.patch('/todos/:id', (req,res) => {
     }
     //check the completed value, and if needed set "completedAt"
     // console.log(req);
-    console.log(req.body);
+    // console.log(req.body);
 
 
     if (_.isBoolean(body.completed) && body.completed) { // i.e. is body.completed a boolean AND is it true
