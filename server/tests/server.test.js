@@ -94,18 +94,6 @@ describe('GET /todos route', () => {
   });
 });
 
-// describe('Get /todos/:id', () => {
-//   it('Should return a todo doc', (done)=> {
-//     request(app)
-//       .get(`/todos/${todos[0]._id.toHexString()}`)
-//       .expect(200)
-//       .expect( (res) => {
-//         expect(res.body.todo.text).toBe(todos[0].text);
-//       })
-//       .end(done());
-//   });
-// });
-
 describe('GET /todos/:id', () => {
 
   it('should return todo doc', (done) => {
@@ -132,5 +120,45 @@ describe('GET /todos/:id', () => {
         .expect(404)
         .end(done);
     });
+
+});
+
+describe('DELETE /todos/:id', () => {
+
+  it('should delete a todo by id', (done) => {
+    var hexID = sampleTodo[1]._id.toHexString();
+    request(app)
+    .delete(`/todos/${hexID}`) // get ID from _second_ item in todos object and convert ID to a string with .toHexString() method
+    .expect(200)
+    .expect( (res) => {
+      expect(res.body.todo._id).toBe(hexID);
+      // expect(res.length).toBe(1);
+    })
+    .end( (error, res) => {
+      if (error) {
+        return done(error);
+      }
+      //query db to confirm that the item doesn't exist there anymore
+      ToDo.findById(hexID).then( (todo) => {
+        expect(todo).toNotExist();
+        done();
+      }).catch( (e) => done(e) );
+    });
+  });
+
+  it('should return 404 if todo not found', (done) => {
+    var newID = new ObjectID().toHexString();
+    request(app)
+      .delete(`/todos/${newID}`) //try to delete item with a valid, but non-existent ID
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return 404 if todo not valid', (done) => {
+    request(app)
+      .delete(`/todos/1245abc`) //try to delete item with an ivalid, but non-existent ID
+      .expect(404)
+      .end(done);
+  });
 
 });
