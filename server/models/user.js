@@ -43,6 +43,8 @@ var UserSchema = new mongoose.Schema({
 
 // overrides default behavhiour to limit/dictate what gets sent back to user
 //i.e. only send back email and user id
+//this customizes what gets send back whenever a model gets stringified, *which happens whenever res.send() is called*
+//see: https://javascript.info/json#custom-tojson
 UserSchema.methods.toJSON = function () {
     var user = this;
     // convert a mongoose variable and convert it to a _regular_ object where only the properties available on the _document_ exist
@@ -51,7 +53,7 @@ UserSchema.methods.toJSON = function () {
 
 };
 
-//this is an "instance" method.  
+//this is an "instance" method. i.e. it occurs on a single instance of our User model, instead of having access to all of them (see .statics() below)
 UserSchema.methods.generateAuthToken = function () {
     var user = this;
     var access = 'auth';
@@ -63,10 +65,39 @@ UserSchema.methods.generateAuthToken = function () {
 
     // .save() returns a promise
     //r eview this in Lec 90 at 8:45
-    //use return so that  server.js can add onto the promise
+    //use return so that  server.js can add onto (?use?) the promise
     return user.save().then( () => {
         return token;
     });
+};
+
+///UserSchema.statics is like UserSchema.methods but it creates a "model method" as opposted to an "instance method"
+
+UserSchema.statics.findByToken = function (token) {
+    var User = this;  //binds the whole _model_ (with all the instances, so we can search them) as opposed to the specific instance
+    var decoded; // will store the decoded jwt value (in hashing.js)
+
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch (e) {
+        // i.e. returns a promise that is always going to reject
+        
+        return Promise.reject(); // less verbose than code immediately below
+        //could passin with a value to use as the 'e' argument in server.js
+        
+        // return new Promise((resolve, reject) => {
+        //     reject();
+        // });
+    }
+    //success case
+    //User.findOne returns a promise.  In order for us to chain on that in server.js, whe need to 'return' this function with the included promise
+    return User.findOne({
+        //querying our "nested object properties"
+        '_id': decoded._id,
+        'tokens.token': token,  //'' required when there's a . in the value. added to _id key for consistency
+        'tokens.access': 'auth'
+    });
+
 };
 
 

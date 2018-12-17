@@ -1,4 +1,4 @@
-require('./config/config')
+require('./config/config');
 
 const _ = require('lodash');
 const express = require('express');
@@ -9,6 +9,7 @@ const {ObjectID} = require('mongodb'); //import ObjectID module from mongoDB lib
 const {mongoose} = require('./db/mongoose');
 const {ToDo} = require('./models/todo');
 const {User} = require('./models/user');
+const {authenticate} = require('./middleware/authenicate');
 
 const app = express();
 const port = process.env.PORT;
@@ -173,6 +174,15 @@ app.post('/users', (req,res) => {
     }).catch( (e) => {
         res.status(400).send(e);
     });
+});
+
+
+ //route below uses the middleware. hmmm
+ //lec 91
+// the route below uses our middleware 'authenticate' (see above)
+//the middleware modifies the req object with the user we just found, and token
+app.get('/users/me', authenticate, (req,res) => {
+    res.send(req.user);
 });
 
 app.listen(port, () => {
