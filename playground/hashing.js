@@ -1,18 +1,36 @@
 const {SHA256} = require('crypto-js');
-
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-var data = {
-  id: 10
-};
+var password = '123abc!';
 
-var token = jwt.sign(data, '123abc');
+// bcrypt.genSalt(10, (err, salt) => {
+//   bcrypt.hash(password, salt, (err, hash) => {
+//     console.log(hash);
+//   });
+// });
 
-console.log(token);
+var hashedPassword = '$2a$10$K7Sr1Fy3HLICepB6rd1sn.zZX9qKRL1H4g5FFt0ljLH14oAdayEje';
 
-var decoded = jwt.verify(token, '123abc');
+//lets you know if the plan value and the hashed value are equal to each other
+// cpmare takes the hashedPassword that would be stored in the db, and takes the salt. It then applies the salt to the new plaintext pswd that we provide it here, and creates a new hash. If this new hash is the same as the hashed password, then we're good.
 
-console.log(decoded);
+//What salting does is it makes each pswd + salt combination unique, so that even if someone decoded the pswd for one user, that knwoledge would not allow the intruder to decode other messages, because each of the salts is unique.  Prevents a brute-force attack.
+bcrypt.compare('123abc!', hashedPassword, (err, result) => {
+  console.log(result); // T or F
+});
+
+// var data = {
+//   id: 10
+// };
+
+// var token = jwt.sign(data, '123abc');
+
+// console.log(token);
+
+// var decoded = jwt.verify(token, '123abc');
+
+// console.log(decoded);
 // jwt.verify
 
 

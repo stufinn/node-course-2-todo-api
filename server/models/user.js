@@ -1,10 +1,10 @@
 //load in mongoose library (not file we created)
 const mongoose = require('mongoose');
-
 const validator = require('validator');
 
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 //make new user model with email property
 //require and trim
@@ -39,6 +39,30 @@ var UserSchema = new mongoose.Schema({
             required: true
         }
     }]
+});
+
+UserSchema.pre('save', function (next) {
+    //get access to individual document
+    var user = this;
+    //need to check if the password is modified.  The user may have changed something else
+    if (user.isModified('password')) {
+        //access password with user.password
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                // assign the hash to user.password
+                user.password = hash;
+                console.log('hashed password:', hash);
+                console.log(user.password);
+                next();  //need to call this in order to move on to save!
+            });
+        });
+    } else {
+        next();
+        // console.log('No hashing yet!')
+    }
+    // next();
+
+    
 });
 
 // overrides default behavhiour to limit/dictate what gets sent back to user
