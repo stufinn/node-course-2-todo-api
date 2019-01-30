@@ -149,6 +149,7 @@ app.patch('/todos/:id', (req,res) => {
 
 app.post('/users', (req,res) => {
 
+    //lodash allows us to pick items off of the request body
     var body = _.pick(req.body, ['email', 'password']);
 
     // var user = new User({
@@ -179,9 +180,10 @@ app.post('/users', (req,res) => {
 
  //route below uses the middleware. hmmm
  //lec 91
-// the route below uses our middleware 'authenticate' (see above)
+// the route below uses our custom middleware 'authenticate' (see above)
 //the middleware modifies the req object with the user we just found, and token
 app.get('/users/me', authenticate, (req,res) => {
+    //res object was modified in the 'authenticate' custom middleware
     res.send(req.user);
 });
 

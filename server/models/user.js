@@ -1,6 +1,6 @@
 //load in mongoose library (not file we created)
 const mongoose = require('mongoose');
-const validator = require('validator');
+const validator = require('validator'); // helps us validate email addresses (among other things)- validator library
 
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
@@ -12,13 +12,14 @@ const bcrypt = require('bcryptjs');
 //min length of 1
 //create one with and without an email property
 
+//use the Schema constructor function because we can't add methods onto the User model, so we create a new _schema_
 var UserSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
         minlength: 1,
         trim: true,
-        unique: true,
+        unique: true, // verifies that the property 'email' doesn't have the value in any of the other documents in the collexn
         validate: {  // https://mongoosejs.com/docs/validation.html
             validator: validator.isEmail,
             },
@@ -51,8 +52,8 @@ UserSchema.pre('save', function (next) {
             bcrypt.hash(user.password, salt, (err, hash) => {
                 // assign the hash to user.password
                 user.password = hash;
-                console.log('hashed password:', hash);
-                console.log(user.password);
+                // console.log('hashed password:', hash);
+                // console.log(user.password);
                 next();  //need to call this in order to move on to save!
             });
         });
@@ -61,11 +62,11 @@ UserSchema.pre('save', function (next) {
         // console.log('No hashing yet!')
     }
     // next();
-
     
 });
 
 // overrides default behavhiour to limit/dictate what gets sent back to user
+// this is .toJSON() is implicitly called when we respond to an express request with res.send (see https://www.udemy.com/the-complete-nodejs-developer-course-2/learn/v4/questions/1930840)
 //i.e. only send back email and user id
 //this customizes what gets send back whenever a model gets stringified, *which happens whenever res.send() is called*
 //see: https://javascript.info/json#custom-tojson
@@ -78,14 +79,25 @@ UserSchema.methods.toJSON = function () {
 };
 
 //this is an "instance" method. i.e. it occurs on a single instance of our User model, instead of having access to all of them (see .statics() below)
+// saves the auth token onto the individual user document
 UserSchema.methods.generateAuthToken = function () {
     var user = this;
     var access = 'auth';
-    var token = jwt.sign({_id: user._id.toHexString(), access }, 'abc123').toString();
+    var token = jwt.sign(
+        {
+            _id: user._id.toHexString(), 
+            access 
+        }, 'abc123').toString();
 
+    // add this new object onto the tokens array
     // user.tokens.push({access,token}); //this approach with push doesn't work consisitently across mongodb versions
     //this line (below) works better with .concat
-    user.tokens = user.tokens.concat([{access, token}]);
+    user.tokens = user.tokens.concat([
+        {
+            access, //ES6 syntax
+            token
+        }
+    ]);
 
     // .save() returns a promise
     //r eview this in Lec 90 at 8:45
@@ -102,12 +114,12 @@ UserSchema.statics.findByToken = function (token) {
     var decoded; // will store the decoded jwt value (in hashing.js)
 
     try {
-        decoded = jwt.verify(token, 'abc123');
+        decoded = jwt.verify(token, 'abc123'); // will throw and error if anything does wrong
     } catch (e) {
         // i.e. returns a promise that is always going to reject
         
         return Promise.reject(); // less verbose than code immediately below
-        //could passin with a value to use as the 'e' argument in server.js
+        //could pass in with a value to use as the 'e' argument in server.js
         
         // return new Promise((resolve, reject) => {
         //     reject();
@@ -124,7 +136,7 @@ UserSchema.statics.findByToken = function (token) {
 
 };
 
-
+// refer to the UserSchema definition above
 var User = mongoose.model('User', UserSchema);
 
 // var newUser = new User({

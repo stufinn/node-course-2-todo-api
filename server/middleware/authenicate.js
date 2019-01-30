@@ -19,8 +19,8 @@ var authenticate = (req, res, next) => {
      //we'll be able to use the modifie
      //we want to use the modified
      //set request properties
-     req.user = user;
-     req.token = token;
+     req.user = user; // set request.user equal to the user we just found
+     req.token = token; // set equal to the token up above
      next(); // allows the route below to execute
   }).catch( (e) => {
       // failed to authorize. Send error status with empty body
