@@ -133,8 +133,34 @@ UserSchema.statics.findByToken = function (token) {
         'tokens.token': token,  //'' required when there's a . in the value. added to _id key for consistency
         'tokens.access': 'auth'
     });
-
 };
+
+UserSchema.statics.findByCredentials = function(email, password) {
+    //first have to find by email, and THEN you compare using the 
+    var User = this;
+
+    return User.findOne({email}).then((user) => {
+        if (!user) {
+          return Promise.reject();  
+        }
+
+        //bcrypt only supports callbacks, so return a new promise to keep using promises
+        return new Promise((resolve, reject) => {
+            //user bcrypt.compare tp compare password and user.password
+            //if do find a user, can call resovle with the user
+            //if not found call rejecxt which will trigger the catch case inside server.js
+            bcrypt.compare(password, user.password, (err, res) => {
+                if (res) {
+                    resolve(user);
+                } else {
+                    reject(err);
+                }
+            });
+        });
+       
+    });
+
+}
 
 // refer to the UserSchema definition above
 var User = mongoose.model('User', UserSchema);

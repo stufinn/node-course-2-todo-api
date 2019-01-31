@@ -187,6 +187,26 @@ app.get('/users/me', authenticate, (req,res) => {
     res.send(req.user);
 });
 
+//POST /users/login  Jan 31, 2019 {email, password}
+
+app.post('/users/login', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+    // res.send(body);
+    //verify user exists with that email
+    User.findByCredentials(body.email, body.password).then((user) => {
+        // res.send(user);
+        return user.generateAuthToken().then((token) => {
+             res.header('x-auth', token).send(user);
+        });
+    }).catch((e) => {
+        res.status(400).send();
+    });
+    //Then get password property and pass it through bcrypt compare
+    //create ANOTHER model method called 'findByCredentials' - takes email and password as arguments --> return a promise with the user or with an error if the user didn't exist
+});
+    
+
+
 app.listen(port, () => {
     console.log(`Started up on port ${port}`);
 });
