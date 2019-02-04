@@ -204,7 +204,19 @@ app.post('/users/login', (req, res) => {
     //Then get password property and pass it through bcrypt compare
     //create ANOTHER model method called 'findByCredentials' - takes email and password as arguments --> return a promise with the user or with an error if the user didn't exist
 });
-    
+
+app.delete('/users/me/token', authenticate, (req,res) => {
+    req.user.removeToken(req.token).then(()=> {
+        res.status(200).send();
+    }, () => {
+        res.status(400).send();
+    });
+});
+
+// app.delete('/users/me/token', authenticate, (req, res) => {
+//     req.user.
+// })
+
 
 
 app.listen(port, () => {
